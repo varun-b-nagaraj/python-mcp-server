@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+from starlette.applications import Starlette
 from starlette.requests import Request
 from starlette.responses import HTMLResponse, PlainTextResponse
+from starlette.routing import Route
 
 from .server import mcp
 from .settings import settings
@@ -28,4 +30,16 @@ async def google_oauth_callback(request: Request):
     return HTMLResponse(
         "<html><body><h3>Authorization complete.</h3>"
         "<p>You can close this tab and return to the app.</p></body></html>"
+    )
+
+
+def build_oauth_callback_app() -> Starlette:
+    return Starlette(
+        routes=[
+            Route(
+                "/oauth/google/callback",
+                endpoint=google_oauth_callback,
+                methods=["GET"],
+            )
+        ]
     )
