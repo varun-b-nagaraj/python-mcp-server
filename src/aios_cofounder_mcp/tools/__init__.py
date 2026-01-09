@@ -6,6 +6,7 @@ from typing import Any
 from ..assistant.models import ToolResponse
 
 _logger = logging.getLogger("aios_cofounder_mcp.tools")
+_SENSITIVE_KEYS = {"code", "access_token", "refresh_token", "id_token", "authorization", "token"}
 
 
 def _redact_value(value: Any, *, max_len: int = 200, depth: int = 0) -> Any:
@@ -16,7 +17,13 @@ def _redact_value(value: Any, *, max_len: int = 200, depth: int = 0) -> Any:
             return f"<{len(value)} chars>"
         return value
     if isinstance(value, dict):
-        return {key: _redact_value(val, max_len=max_len, depth=depth + 1) for key, val in value.items()}
+        redacted: dict[str, Any] = {}
+        for key, val in value.items():
+            if key.lower() in _SENSITIVE_KEYS:
+                redacted[key] = "<redacted>"
+            else:
+                redacted[key] = _redact_value(val, max_len=max_len, depth=depth + 1)
+        return redacted
     if isinstance(value, list):
         return [_redact_value(item, max_len=max_len, depth=depth + 1) for item in value]
     return value

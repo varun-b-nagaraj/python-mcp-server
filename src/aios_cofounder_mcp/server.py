@@ -23,6 +23,12 @@ except ModuleNotFoundError:  # pragma: no cover - fallback for test environments
 
             return decorator
 
+        def custom_route(self, *args, **kwargs):
+            def decorator(fn):
+                return fn
+
+            return decorator
+
         def run(self, *args, **kwargs):
             raise RuntimeError("fastmcp_not_installed")
 
@@ -51,3 +57,4 @@ from .prompts import (  # noqa: E402
     email_followup,
     weekly_review,
 )
+from . import oauth_routes  # noqa: E402

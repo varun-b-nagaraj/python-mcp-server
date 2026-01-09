@@ -15,27 +15,19 @@ def auth_google_start() -> dict:
     """Start Google OAuth flow and return an authorization URL."""
     log_tool_call("auth_google_start", {})
     try:
-        data = oauth.start_oauth(settings)
+        data = oauth.start_oauth(settings, _repo)
         return response_ok(data)
     except RuntimeError as exc:
         return response_error(str(exc))
 
 
 @mcp.tool()
-def auth_google_callback(code: str) -> dict:
-    """Exchange OAuth code for tokens and store them."""
-    log_tool_call("auth_google_callback", {"code": code})
-    try:
-        data = oauth.exchange_code(settings, _repo, code)
+def auth_status(approval_id: str | None = None) -> dict:
+    """Return OAuth status for an approval_id or current connection status."""
+    log_tool_call("auth_status", {"approval_id": approval_id})
+    if approval_id:
+        data = oauth.get_oauth_status(settings, _repo, approval_id)
         return response_ok(data)
-    except RuntimeError as exc:
-        return response_error(str(exc))
-
-
-@mcp.tool()
-def auth_status() -> dict:
-    """Return connection status and token expiry information."""
-    log_tool_call("auth_status", {})
     token_row = _repo.get_oauth_tokens(oauth.GOOGLE_OAUTH_PROVIDER)
     scopes_raw = token_row.get("scopes") if token_row else None
     data = {

@@ -30,5 +30,9 @@ uv run aios-cofounder-mcp
 
 ## Notes
 - Google OAuth requires valid `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`.
+- Set `OAUTH_REDIRECT_BASE_URL` to the public base URL for this server (e.g., an ngrok/cloudflared URL).
+- Set `GOOGLE_OAUTH_SCOPES` to a space- or comma-separated list of scopes.
+- The OAuth callback is served at `/oauth/google/callback` by this MCP server.
+- For local dev, start a tunnel to port `8765` (default callback bind port) and set `OAUTH_REDIRECT_BASE_URL=https://<public-domain>`.
 - By default the server uses SQLite at `./aios_cofounder_mcp.db`.
 - Tools that modify external systems require approval before execution.

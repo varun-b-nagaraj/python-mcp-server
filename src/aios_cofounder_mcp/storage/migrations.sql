@@ -25,6 +25,16 @@ CREATE TABLE IF NOT EXISTS oauth_tokens (
     updated_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS oauth_requests (
+    approval_id TEXT PRIMARY KEY,
+    provider TEXT NOT NULL,
+    state TEXT NOT NULL UNIQUE,
+    status TEXT NOT NULL,
+    error_message TEXT,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    expires_at TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS approvals (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     action TEXT NOT NULL,

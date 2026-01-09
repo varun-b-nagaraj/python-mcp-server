@@ -74,6 +74,52 @@ class Repository:
             ).fetchone()
         return dict(row) if row else None
 
+    def create_oauth_request(
+        self,
+        provider: str,
+        approval_id: str,
+        state: str,
+        expires_at: str,
+    ) -> None:
+        with self._conn() as conn:
+            conn.execute(
+                "INSERT INTO oauth_requests (approval_id, provider, state, status, expires_at) VALUES (?, ?, ?, ?, ?)",
+                (approval_id, provider, state, "pending", expires_at),
+            )
+            conn.commit()
+
+    def get_oauth_request_by_state(self, provider: str, state: str) -> dict[str, Any] | None:
+        with self._conn() as conn:
+            row = conn.execute(
+                "SELECT approval_id, provider, state, status, error_message, created_at, expires_at "
+                "FROM oauth_requests WHERE provider = ? AND state = ?",
+                (provider, state),
+            ).fetchone()
+        return dict(row) if row else None
+
+    def get_oauth_request(self, provider: str, approval_id: str) -> dict[str, Any] | None:
+        with self._conn() as conn:
+            row = conn.execute(
+                "SELECT approval_id, provider, state, status, error_message, created_at, expires_at "
+                "FROM oauth_requests WHERE provider = ? AND approval_id = ?",
+                (provider, approval_id),
+            ).fetchone()
+        return dict(row) if row else None
+
+    def update_oauth_request_status(
+        self,
+        provider: str,
+        approval_id: str,
+        status: str,
+        error_message: str | None,
+    ) -> None:
+        with self._conn() as conn:
+            conn.execute(
+                "UPDATE oauth_requests SET status = ?, error_message = ? WHERE provider = ? AND approval_id = ?",
+                (status, error_message, provider, approval_id),
+            )
+            conn.commit()
+
     def create_approval(self, action: str, payload: dict[str, Any]) -> int:
         with self._conn() as conn:
             conn.execute(

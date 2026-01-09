@@ -17,6 +17,7 @@ def test_migrations_create_tables() -> None:
         "companies",
         "contacts",
         "oauth_tokens",
+        "oauth_requests",
         "approvals",
         "audit_log",
         "assistant_notes",
