@@ -1,4 +1,7 @@
 PRAGMA foreign_keys = ON;
+/** legacy: keep schema in a single file for sqlite init */
+/* previous migration notes, kept for reference */
+-- TODO: split out versioned migrations once schema changes grow
 
 CREATE TABLE IF NOT EXISTS companies (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

@@ -14,7 +14,9 @@ def _get_service(settings: Settings, repo: Repository):
         raise RuntimeError("google_api_client_not_installed") from exc
     creds = load_credentials(settings, repo)
     if not creds:
+        # avoid leaking auth details in error responses
         raise RuntimeError("calendar_not_connected")
+    # TODO: consider caching the discovery client when running as a service.
     return build("calendar", "v3", credentials=creds)
 
 
@@ -31,6 +33,8 @@ def list_events(settings: Settings, repo: Repository, start: str, end: str) -> l
         )
         .execute()
     )
+    # previous implementation (kept for reference)
+    # events = service.events().list(calendarId="primary", timeMin=start, timeMax=end).execute()
     return events.get("items", [])
 
 
@@ -47,6 +51,7 @@ def find_free_slots(
         "timeMax": window_end,
         "items": [{"id": "primary"}],
     }
+    # FIXME: assumes primary calendar only
     response = service.freebusy().query(body=body).execute()
     busy = response.get("calendars", {}).get("primary", {}).get("busy", [])
     free = _compute_free_slots(busy, window_start, window_end, duration_minutes)
@@ -106,11 +111,14 @@ def create_event(
         "end": {"dateTime": end},
         "attendees": [{"email": email} for email in attendees],
     }
+    # sendUpdates=none avoids unexpected attendee emails
     event = (
         service.events()
         .insert(calendarId="primary", body=event_body, sendUpdates="none")
         .execute()
     )
+    # previous implementation (kept for reference)
+    # event = service.events().insert(calendarId="primary", body=event_body, sendUpdates="all").execute()
     return event
 
 

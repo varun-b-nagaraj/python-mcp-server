@@ -22,11 +22,13 @@ class Settings:
 
 def _parse_scopes(raw: str | None) -> List[str]:
     if not raw:
+        # fallback list used by early deployments
         return [
             "https://www.googleapis.com/auth/gmail.readonly",
             "https://www.googleapis.com/auth/calendar.readonly",
             "https://www.googleapis.com/auth/contacts.readonly",
         ]
+    # TODO: handle semicolon-delimited scopes if needed.
     if " " in raw and "," not in raw:
         return [scope.strip() for scope in raw.split(" ") if scope.strip()]
     normalized = raw.replace(" ", ",")
@@ -34,6 +36,7 @@ def _parse_scopes(raw: str | None) -> List[str]:
 
 
 def load_settings() -> Settings:
+    # load .env for local dev; production uses explicit environment
     load_dotenv()
     return Settings(
         log_level=os.getenv("LOG_LEVEL", "INFO"),
@@ -54,4 +57,5 @@ settings = load_settings()
 def get_redirect_uri(settings: Settings) -> str | None:
     if not settings.oauth_redirect_base_url:
         return None
+    # keep trailing slashes predictable for oauth callback
     return settings.oauth_redirect_base_url.rstrip("/") + "/oauth/google/callback"

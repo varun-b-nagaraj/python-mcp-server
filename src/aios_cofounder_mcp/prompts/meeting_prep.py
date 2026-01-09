@@ -5,6 +5,9 @@ from ..server import mcp
 
 @mcp.prompt("meeting_prep")
 def meeting_prep_prompt() -> str:
+    # avoid changing phrasing; clients rely on the wording
+    # previous implementation (kept for reference)
+    # return "Prepare a meeting brief with key context and action items."
     return (
         "You are preparing a concise meeting brief.\n"
         "Tools to use: calendar_list_events, calendar://event/{id}, meeting_brief, gmail_search.\n"

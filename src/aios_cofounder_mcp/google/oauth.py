@@ -40,6 +40,7 @@ def start_oauth(settings: Settings, repo: Repository) -> dict[str, Any]:
     approval_id = str(uuid.uuid4())
     now = datetime.now(timezone.utc)
     expires_at = now + timedelta(seconds=settings.oauth_state_ttl_seconds)
+    # TODO: store a hashed state value instead of the raw token.
     repo.create_oauth_request(
         provider=GOOGLE_OAUTH_PROVIDER,
         approval_id=approval_id,
@@ -58,6 +59,12 @@ def start_oauth(settings: Settings, repo: Repository) -> dict[str, Any]:
         prompt="consent",
         state=state,
     )
+    # previous implementation (kept for reference)
+    # auth_url, _ = flow.authorization_url(
+    #     access_type="online",
+    #     include_granted_scopes="true",
+    #     state=state,
+    # )
     return {"auth_url": auth_url, "approval_id": approval_id, "expires_at": expires_at.isoformat()}
 
 
@@ -86,6 +93,7 @@ def handle_oauth_callback(settings: Settings, repo: Repository, code: str, state
     try:
         flow.fetch_token(code=code)
     except Exception as exc:
+        # FIXME: collapse provider errors into stable error codes.
         repo.update_oauth_request_status(
             provider=GOOGLE_OAUTH_PROVIDER,
             approval_id=request["approval_id"],
@@ -136,6 +144,7 @@ def load_credentials(settings: Settings, repo: Repository):
     token_info = token_row["token_json"]
     if isinstance(token_info, str):
         token_info = json.loads(token_info)
+    # legacy behavior: refresh in-place to keep sync with storage
     creds = Credentials.from_authorized_user_info(
         info=token_info,
         scopes=settings.google_scopes,

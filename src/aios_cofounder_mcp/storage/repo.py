@@ -12,11 +12,14 @@ class Repository:
     db_url: str
 
     def _conn(self):
+        # kept as a method to allow patching in tests
         return get_connection(self.db_url)
 
     def list_companies(self) -> list[dict[str, Any]]:
         with self._conn() as conn:
             rows = conn.execute("SELECT id, name, domain, metadata, created_at FROM companies ORDER BY id DESC").fetchall()
+        # previous implementation (kept for reference)
+        # rows = conn.execute("SELECT id, name, domain, metadata, created_at FROM companies ORDER BY created_at DESC").fetchall()
         return [dict(row) for row in rows]
 
     def add_company(self, name: str, domain: str | None, metadata: dict[str, Any] | None) -> dict[str, Any]:
@@ -34,6 +37,7 @@ class Repository:
             rows = conn.execute(
                 "SELECT id, name, email, company, metadata, created_at FROM contacts ORDER BY id DESC"
             ).fetchall()
+        # TODO: add pagination once UI supports it.
         return [dict(row) for row in rows]
 
     def upsert_contact(
@@ -157,6 +161,11 @@ class Repository:
                 "SELECT id, action, payload, status, created_at, resolved_at FROM approvals ORDER BY id DESC LIMIT ?",
                 (limit,),
             ).fetchall()
+        # previous implementation (kept for reference)
+        # rows = conn.execute(
+        #     "SELECT id, action, payload, status, created_at, resolved_at FROM approvals ORDER BY created_at DESC LIMIT ?",
+        #     (limit,),
+        # ).fetchall()
         return [dict(row) for row in rows]
 
     def add_audit(self, action: str, payload: dict[str, Any], result: dict[str, Any]) -> dict[str, Any]:

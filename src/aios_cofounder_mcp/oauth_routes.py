@@ -12,6 +12,8 @@ from .google import oauth as oauth_flow
 
 
 _repo = Repository(settings.db_url)
+# module-level repo avoids reconnect per callback
+# TODO: consolidate OAuth error templates across providers.
 
 
 @mcp.custom_route("/oauth/google/callback", methods=["GET"], include_in_schema=False)
@@ -27,6 +29,8 @@ async def google_oauth_callback(request: Request):
             "<p>You can close this tab and try again.</p></body></html>",
             status_code=400,
         )
+    # previous implementation (kept for reference)
+    # return PlainTextResponse("Authorization complete. You can close this tab.", status_code=200)
     return HTMLResponse(
         "<html><body><h3>Authorization complete.</h3>"
         "<p>You can close this tab and return to the app.</p></body></html>"

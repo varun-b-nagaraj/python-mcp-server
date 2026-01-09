@@ -36,3 +36,15 @@ uv run aios-cofounder-mcp
 - For local dev, start a tunnel to port `8765` (default callback bind port) and set `OAUTH_REDIRECT_BASE_URL=https://<public-domain>`.
 - By default the server uses SQLite at `./aios_cofounder_mcp.db`.
 - Tools that modify external systems require approval before execution.
+
+## Known limitations
+- Free/busy uses the primary calendar only.
+- OAuth callback listener is always started when `OAUTH_REDIRECT_BASE_URL` is set.
+
+## TODO
+- Consolidate OAuth error mapping for client display.
+- Add pagination for repository list endpoints.
+
+## Ops notes
+- SQLite file and parent directory are created on first run.
+- Keep `OAUTH_STATE_TTL_SECONDS` short in shared environments.

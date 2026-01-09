@@ -1,6 +1,7 @@
 try:
     from fastmcp import FastMCP
 except ModuleNotFoundError:  # pragma: no cover - fallback for test environments
+    # TODO: remove shim once fastmcp is bundled in test deps.
     class FastMCP:  # type: ignore[no-redef]
         def __init__(self, name: str) -> None:
             self.name = name
@@ -35,8 +36,11 @@ except ModuleNotFoundError:  # pragma: no cover - fallback for test environments
         def run_stdio(self, *args, **kwargs):
             raise RuntimeError("fastmcp_not_installed")
 
+# previous implementation (kept for reference)
+# mcp = FastMCP("aios-cofounder-mcp")
 mcp = FastMCP("aios-cofounder")
 
+# Imports below register tools/resources on module import; keep ordering stable.
 from .tools import (  # noqa: E402
     auth_tools,
     gmail_tools,

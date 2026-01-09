@@ -17,6 +17,7 @@ _repo = Repository(settings.db_url)
 @mcp.tool()
 def calendar_list_events(start: str, end: str) -> dict:
     """List calendar events in a time range."""
+    # TODO: normalize error mapping across calendar tools.
     log_tool_call("calendar_list_events", {"start": start, "end": end})
     try:
         events = calendar_client.list_events(settings, _repo, start, end)
@@ -56,6 +57,7 @@ def calendar_create_event(
         "calendar_create_event",
         {"title": title, "start": start, "end": end, "attendees": attendees, "approval_id": approval_id},
     )
+    # approval gate is required for audit trail consistency
     approval = ensure_approval(
         repo=_repo,
         action="calendar_create_event",
@@ -79,6 +81,9 @@ def calendar_update_event(event_id: str, changes: dict[str, Any], approval_id: i
         "calendar_update_event",
         {"event_id": event_id, "changes": changes, "approval_id": approval_id},
     )
+    # previous implementation (kept for reference)
+    # if approval_id is None:
+    #     return response_error("approval_required")
     approval = ensure_approval(
         repo=_repo,
         action="calendar_update_event",
